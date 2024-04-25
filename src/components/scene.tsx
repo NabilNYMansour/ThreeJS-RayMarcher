@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { fragCode, vertCode } from '../shaders/main';
@@ -10,26 +10,26 @@ interface SceneProps {
 
 export const Scene = ({ shaderCode }: SceneProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const renderer = useRef<THREE.WebGLRenderer>();
+    const [renderer, setRenderer] = useState<THREE.WebGLRenderer>();
     const material = useRef<THREE.ShaderMaterial>();
 
     useEffect(() => {
-        if (canvasRef.current && renderer.current) {
+        if (canvasRef.current && renderer) {
             // Create scene, camera, and set renderer
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             // const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
-            renderer.current.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(window.innerWidth, window.innerHeight);
 
             // Set background color
             const backgroundColor = new THREE.Color(0x3399ee);
-            renderer.current.setClearColor(backgroundColor, 1);
+            renderer.setClearColor(backgroundColor, 1);
 
             // Position camera
             camera.position.z = 5;
 
             // Add orbit controls
-            const controls = new OrbitControls(camera, renderer.current.domElement);
+            const controls = new OrbitControls(camera, renderer.domElement);
             controls.maxDistance = 10;
             controls.minDistance = 2;
 
@@ -88,7 +88,7 @@ export const Scene = ({ shaderCode }: SceneProps) => {
                 const nearPlaneHeight = nearPlaneWidth / camera.aspect;
                 screenPlane.scale.set(nearPlaneWidth, nearPlaneHeight, 1);
 
-                if (renderer.current) renderer.current.setSize(window.innerWidth, window.innerHeight);
+                if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
             });
 
             // Stats
@@ -108,8 +108,8 @@ export const Scene = ({ shaderCode }: SceneProps) => {
                 screenPlane.position.copy(cameraForwardPos);
                 screenPlane.rotation.copy(camera.rotation);
 
-                if (renderer.current) {
-                    renderer.current.render(scene, camera);
+                if (renderer) {
+                    renderer.render(scene, camera);
                 }
 
                 stats.end();
@@ -119,10 +119,10 @@ export const Scene = ({ shaderCode }: SceneProps) => {
 
             // Cleanup
             return () => {
-                if (renderer.current) renderer.current.dispose();
+                if (renderer) renderer.dispose();
             };
         }
-    }, []);
+    }, [canvasRef.current]);
 
     useEffect(() => {
         if (canvasRef.current) {
@@ -133,7 +133,7 @@ export const Scene = ({ shaderCode }: SceneProps) => {
             webGLRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             webGLRenderer.setClearColor(new THREE.Color("black"), 0.9);
 
-            renderer.current = webGLRenderer;
+            setRenderer(webGLRenderer);
         }
     }, [canvasRef.current]);
 
