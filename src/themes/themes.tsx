@@ -3,6 +3,7 @@ import { createTheme } from "@mui/material";
 // Theming
 export const darkTheme = createTheme({
   typography: {
+    fontFamily: 'Caviar-Dreams',
     button: {
       textTransform: 'none'
     },
@@ -18,17 +19,6 @@ export const darkTheme = createTheme({
     background: {
       default: "#201f29",
       paper: "#201f29",
-    },
-  },
-});
-
-export const lightTheme = createTheme({
-  palette: {
-    mode: "light",
-    background: {
-      // make the theme the light version of #201f29"
-      default: "#fefefe",
-      paper: "#fefefe",
     },
   },
 });

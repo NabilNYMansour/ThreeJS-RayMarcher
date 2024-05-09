@@ -1,3 +1,13 @@
+@font-face {
+  font-family: 'Caviar-Dreams';
+  src: url('/Caviar-Dreams.ttf.woff') format('woff'),
+    url('/Caviar-Dreams.ttf.svg#Caviar-Dreams') format('svg'),
+    url('/Caviar-Dreams.ttf.eot'),
+    url('/Caviar-Dreams.ttf.eot?#iefix') format('embedded-opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html,
 body,
 #app,
@@ -7,6 +17,7 @@ body,
   margin: 0;
   padding: 0;
   background-color: #282c34;
+  font-family: 'Caviar-Dreams';
 }
 
 @keyframes fade-in {
@@ -134,4 +145,15 @@ canvas {
 /* Changes the thumb color on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: white; /* Darker color on hover */
+}
+
+.link {
+  color: white;
+  font-weight: bold;
+  text-decoration: underline;
+  
+}
+
+.link:hover {
+  color: lightgray;
 }

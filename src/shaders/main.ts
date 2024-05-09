@@ -48,6 +48,8 @@ uniform float u_specIntensity;
 uniform float u_ambientIntensity;
 
 uniform float u_shininess;
+
+uniform float u_time;
 `;
 
 export const fragCode = glsl`
@@ -130,7 +132,7 @@ export const checkShaderComplied = (vertCode: string, fragCode: string) => {
     console.error = error;
 
     if (errorInfo.includes("ERROR:")) {
-        const lines = 219;
+        const lines = 221; // done manually
         const regex = /ERROR: (\d+):(\d+)/;
         const modifiedErrorInfo = errorInfo.replace(regex, (_, p1, p2) => "ERROR: " + p1 + ":" + (parseInt(p2, 10) - lines));
         errorInfo = modifiedErrorInfo;

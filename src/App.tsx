@@ -13,21 +13,30 @@ import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { megnerSponge, monoOxide } from './shaders/examples';
+import { infiniteSpheres, megnerSponge, monoOxide } from './shaders/examples';
+import SceneFooter from './components/sceneFooter';
+import HelpIcon from '@mui/icons-material/Help';
+import HelpDialog from './components/helpDialog';
 
 function App() {
-  const [editorCode, setEditorCode] = useState<string>(monoOxide);
-  const [editorCodeChanges, setEditorCodeChanges] = useState<string>(monoOxide);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  const [editorCode, setEditorCode] = useState<string>(infiniteSpheres);
+  const [editorCodeChanges, setEditorCodeChanges] = useState<string>(infiniteSpheres);
   const [shadersCompiled, setShadersCompiled] = useState<0 | 1 | 2>(1);
+  const [shaderError, setShaderError] = useState<string>('');
 
   const [showCode, setShowCode] = useState<boolean>(true);
 
   const applyChanges = () => {
     // vertCode is guaranteed to be compiled
     const checkShaders = checkShaderComplied(vertCode, uniformCode + utils + editorCodeChanges + marcher + other + fragCode)
+    console.log(checkShaders.errorInfo);
     setShadersCompiled(checkShaders.compiled ? 1 : 0);
     if (checkShaders.compiled) {
       setEditorCode(editorCodeChanges);
+    } else {
+      setShaderError(checkShaders.errorInfo.slice(0, checkShaders.errorInfo.length - 1));
     }
   };
 
@@ -54,8 +63,14 @@ function App() {
               {showCode ? "Hide Code" : "Show Code"}
             </Button>
             <Divider orientation="vertical" variant="fullWidth" flexItem />
-            <Typography style={{ padding: '8px' }} ><b>Examples</b></Typography>
-            <Divider orientation="vertical" variant="middle" flexItem />
+            <Tooltip
+              title={
+                <div style={{ fontSize: "1.5em", textAlign: "center" }}>
+                  Click on one of the examples and run in the editor
+                </div>
+              }>
+              <Typography style={{ padding: '8px' }} ><b>Examples:</b></Typography>
+            </Tooltip>
             <Button
               onClick={() => switchExample(monoOxide)}
             >
@@ -66,6 +81,15 @@ function App() {
             >
               Menger Sponge
             </Button>
+            <Button
+              onClick={() => switchExample(infiniteSpheres)}>
+              Infinite Spheres
+            </Button>
+            <Divider orientation="vertical" variant="fullWidth" flexItem />
+            <IconButton onClick={() => setDialogOpen(!dialogOpen)}>
+              <HelpIcon />
+            </IconButton>
+            <HelpDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
           </div>
         </div>
         {/* ------------------------ Editor ------------------------ */}
@@ -119,9 +143,14 @@ function App() {
                 </IconButton>
               </Tooltip>
               <Typography>{editorCodeChanges.length} chars</Typography>
-              <Tooltip title={shadersCompiled === 2 ?
-                "Not compiled" :
-                shadersCompiled ? "Compiled" : "Error found"} enterDelay={500}>
+              <Tooltip
+                title={shadersCompiled === 2 ?
+                  "Not compiled" :
+                  shadersCompiled ? "Compiled" :
+                    <div style={{ fontSize: "1.5em", textAlign: "center" }}>
+                      {shaderError}
+                    </div>
+                } enterDelay={500}>
                 <Icon style={{ padding: '8px' }}>
                   {shadersCompiled === 2 ?
                     <WarningAmberIcon color='warning' /> :
@@ -138,6 +167,7 @@ function App() {
 
         {/* ------------------------ Scene ------------------------ */}
         <Scene shaderCode={uniformCode + utils + editorCode + marcher + other} />
+        <SceneFooter />
         {/* ------------------------------------------------------- */}
       </div>
     </ThemeProvider >
