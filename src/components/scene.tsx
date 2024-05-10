@@ -6,13 +6,14 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 
 interface SceneProps {
     shaderCode: string;
-    autoRotate: boolean;
+    isMobile: boolean;
 }
 
-export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
+export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [renderer, setRenderer] = useState<THREE.WebGLRenderer>();
     const material = useRef<THREE.ShaderMaterial>();
+    const [resizeFactor, _] = useState<number>(isMobile ? 2 : 1);
 
     useEffect(() => {
         if (canvasRef.current && renderer) {
@@ -20,7 +21,7 @@ export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             // const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(window.innerWidth / resizeFactor, window.innerHeight / resizeFactor);
 
             // Set background color
             const backgroundColor = new THREE.Color(0x3399ee);
@@ -33,7 +34,7 @@ export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.maxDistance = 10;
             controls.minDistance = 2;
-            controls.autoRotate = autoRotate;
+            controls.autoRotate = isMobile;
             controls.autoRotateSpeed = 0.5;
             controls.enableDamping = true;
 
@@ -92,7 +93,7 @@ export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
                 const nearPlaneHeight = nearPlaneWidth / camera.aspect;
                 screenPlane.scale.set(nearPlaneWidth, nearPlaneHeight, 1);
 
-                if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
+                if (renderer) renderer.setSize(window.innerWidth / resizeFactor, window.innerHeight / resizeFactor);
             });
 
             // Stats
@@ -134,6 +135,8 @@ export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
             return () => {
                 if (renderer) renderer.dispose();
             };
+
+
         }
     }, [canvasRef.current]);
 
@@ -157,7 +160,9 @@ export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
         }
     }, [shaderCode])
 
-    return <canvas ref={canvasRef} />;
+    return <div className='canvas-wrapper'>
+        <canvas style={{ scale: resizeFactor.toString() }} ref={canvasRef} />
+    </div>;
 };
 
 export default Scene;

@@ -176,7 +176,7 @@ function App() {
             {/* ------------------------ Scene ------------------------ */}
             <SceneFooter />
           </>}
-        <Scene autoRotate={isMobile} shaderCode={uniformCode + utils + editorCode + marcher + other} />
+        <Scene isMobile={isMobile} shaderCode={uniformCode + utils + editorCode + marcher + other} />
         {/* ------------------------------------------------------- */}
       </div>
     </ThemeProvider >
