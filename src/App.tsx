@@ -17,6 +17,8 @@ import { infiniteSpheres, megnerSponge, monoOxide } from './shaders/examples';
 import SceneFooter from './components/sceneFooter';
 import HelpIcon from '@mui/icons-material/Help';
 import HelpDialog from './components/helpDialog';
+import { isMobile } from 'react-device-detect';
+import MobileView from './components/mobileView';
 
 function App() {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -53,121 +55,128 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <div>
-        <div className='top-bar-wrapper'>
-          <div className='top-bar'>
-            <Button
-              style={{ minWidth: '120px' }}
-              onClick={toggleShowCode}
-              startIcon={showCode ? <CloseFullscreenIcon /> : <OpenInFullIcon />}
-            >
-              {showCode ? "Hide Code" : "Show Code"}
-            </Button>
-            <Divider orientation="vertical" variant="fullWidth" flexItem />
-            <Tooltip
-              title={
-                <div style={{ fontSize: "1.5em", textAlign: "center" }}>
-                  Click on one of the examples and run in the editor
-                </div>
-              }>
-              <Typography style={{ padding: '8px' }} ><b>Examples:</b></Typography>
-            </Tooltip>
-            <Button
-              onClick={() => switchExample(monoOxide)}
-            >
-              Mono Oxide
-            </Button>
-            <Button
-              onClick={() => switchExample(megnerSponge)}
-            >
-              Menger Sponge
-            </Button>
-            <Button
-              onClick={() => switchExample(infiniteSpheres)}>
-              Infinite Spheres
-            </Button>
-            <Divider orientation="vertical" variant="fullWidth" flexItem />
-            <IconButton onClick={() => setDialogOpen(!dialogOpen)}>
-              <HelpIcon />
-            </IconButton>
-            <HelpDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-          </div>
-        </div>
-        {/* ------------------------ Editor ------------------------ */}
-        <div className='editor'>
-          <div className={'code-mirror-wrapper' + (showCode ? " " : " fade-out")}>
+        {isMobile ?
+          <MobileView />
+          :
+          <>
             {/* ------------------------ Top bar ------------------------ */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <Typography style={{ paddingLeft: "8px" }}>Main SDF Code</Typography>
-              <Tooltip title="hide code" placement="top" enterDelay={500}>
-                <IconButton onClick={toggleShowCode}>
-                  <CloseFullscreenIcon sx={{ fontSize: "small" }} />
-                </IconButton>
-              </Tooltip>
-            </div>
-            {/* --------------------------------------------------------- */}
-
-
-            {/* ------------------------ Code Mirror ------------------------ */}
-            <CodeMirror
-              className='code-mirror'
-              value={editorCodeChanges}
-              onChange={(code) => {
-                setEditorCodeChanges(code);
-                setShadersCompiled(2);
-              }}
-              basicSetup={{
-                foldGutter: false,
-                dropCursor: false,
-                allowMultipleSelections: false,
-                indentOnInput: false,
-              }}
-              theme='dark'
-              extensions={[cpp()]}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && event.altKey) {
-                  event.preventDefault();
-                  applyChanges();
-                }
-              }}
-            />
-            {/* ------------------------------------------------------------- */}
-
-
-            {/* ------------------------ Bottom bar ------------------------ */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <Tooltip title="Run code (Alt + Enter)" enterDelay={500}>
-                <IconButton
-                  color='primary'
-                  onClick={applyChanges}>
-                  <PlayArrowIcon />
-                </IconButton>
-              </Tooltip>
-              <Typography>{editorCodeChanges.length} chars</Typography>
-              <Tooltip
-                title={shadersCompiled === 2 ?
-                  "Not compiled" :
-                  shadersCompiled ? "Compiled" :
+            <div className='top-bar-wrapper'>
+              <div className='top-bar'>
+                <Button
+                  style={{ minWidth: '120px' }}
+                  onClick={toggleShowCode}
+                  startIcon={showCode ? <CloseFullscreenIcon /> : <OpenInFullIcon />}
+                >
+                  {showCode ? "Hide Code" : "Show Code"}
+                </Button>
+                <Divider orientation="vertical" variant="fullWidth" flexItem />
+                <Tooltip
+                  title={
                     <div style={{ fontSize: "1.5em", textAlign: "center" }}>
-                      {shaderError}
+                      Click on one of the examples and run in the editor
                     </div>
-                } enterDelay={500}>
-                <Icon style={{ padding: '8px' }}>
-                  {shadersCompiled === 2 ?
-                    <WarningAmberIcon color='warning' /> :
-                    shadersCompiled ?
-                      <CheckIcon color='success' /> :
-                      <ClearIcon color='error' />}
-                </Icon>
-              </Tooltip>
+                  }>
+                  <Typography style={{ padding: '8px' }} ><b>Examples:</b></Typography>
+                </Tooltip>
+                <Button
+                  onClick={() => switchExample(monoOxide)}
+                >
+                  Mono Oxide
+                </Button>
+                <Button
+                  onClick={() => switchExample(megnerSponge)}
+                >
+                  Menger Sponge
+                </Button>
+                <Button
+                  onClick={() => switchExample(infiniteSpheres)}>
+                  Infinite Spheres
+                </Button>
+                <Divider orientation="vertical" variant="fullWidth" flexItem />
+                <IconButton onClick={() => setDialogOpen(!dialogOpen)}>
+                  <HelpIcon />
+                </IconButton>
+                <HelpDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
+              </div>
             </div>
-            {/* ----------------------------------------------------------- */}
-          </div>
-        </div>
-        {/* -------------------------------------------------------- */}
+            {/* -------------------------------------------------------- */}
 
-        {/* ------------------------ Scene ------------------------ */}
-        <Scene shaderCode={uniformCode + utils + editorCode + marcher + other} />
-        <SceneFooter />
+            {/* ------------------------ Editor ------------------------ */}
+            <div className='editor'>
+              <div className={'code-mirror-wrapper' + (showCode ? " " : " fade-out")}>
+                {/* ------------------------ Top bar ------------------------ */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Typography style={{ paddingLeft: "8px" }}>Main SDF Code</Typography>
+                  <Tooltip title="hide code" placement="top" enterDelay={500}>
+                    <IconButton onClick={toggleShowCode}>
+                      <CloseFullscreenIcon sx={{ fontSize: "small" }} />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+                {/* --------------------------------------------------------- */}
+
+
+                {/* ------------------------ Code Mirror ------------------------ */}
+                <CodeMirror
+                  className='code-mirror'
+                  value={editorCodeChanges}
+                  onChange={(code) => {
+                    setEditorCodeChanges(code);
+                    setShadersCompiled(2);
+                  }}
+                  basicSetup={{
+                    foldGutter: false,
+                    dropCursor: false,
+                    allowMultipleSelections: false,
+                    indentOnInput: false,
+                  }}
+                  theme='dark'
+                  extensions={[cpp()]}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && event.altKey) {
+                      event.preventDefault();
+                      applyChanges();
+                    }
+                  }}
+                />
+                {/* ------------------------------------------------------------- */}
+
+
+                {/* ------------------------ Bottom bar ------------------------ */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Tooltip title="Run code (Alt + Enter)" enterDelay={500}>
+                    <IconButton
+                      color='primary'
+                      onClick={applyChanges}>
+                      <PlayArrowIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Typography>{editorCodeChanges.length} chars</Typography>
+                  <Tooltip
+                    title={shadersCompiled === 2 ?
+                      "Not compiled" :
+                      shadersCompiled ? "Compiled" :
+                        <div style={{ fontSize: "1.5em", textAlign: "center" }}>
+                          {shaderError}
+                        </div>
+                    } enterDelay={500}>
+                    <Icon style={{ padding: '8px' }}>
+                      {shadersCompiled === 2 ?
+                        <WarningAmberIcon color='warning' /> :
+                        shadersCompiled ?
+                          <CheckIcon color='success' /> :
+                          <ClearIcon color='error' />}
+                    </Icon>
+                  </Tooltip>
+                </div>
+                {/* ----------------------------------------------------------- */}
+              </div>
+            </div>
+            {/* -------------------------------------------------------- */}
+            {/* ------------------------ Scene ------------------------ */}
+            <Scene shaderCode={uniformCode + utils + editorCode + marcher + other} />
+            <SceneFooter />
+          </>}
         {/* ------------------------------------------------------- */}
       </div>
     </ThemeProvider >
