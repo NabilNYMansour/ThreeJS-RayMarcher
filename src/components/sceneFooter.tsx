@@ -29,6 +29,7 @@ const sceneFooterStyle: React.CSSProperties = {
     position: 'absolute',
     bottom: '0',
     right: '0',
+    zIndex: 100,
 };
 
 const buttonsListStyle: React.CSSProperties = {

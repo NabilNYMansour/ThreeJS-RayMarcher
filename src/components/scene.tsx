@@ -6,9 +6,10 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 
 interface SceneProps {
     shaderCode: string;
+    autoRotate: boolean;
 }
 
-export const Scene = ({ shaderCode }: SceneProps) => {
+export const Scene = ({ shaderCode, autoRotate }: SceneProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [renderer, setRenderer] = useState<THREE.WebGLRenderer>();
     const material = useRef<THREE.ShaderMaterial>();
@@ -32,6 +33,9 @@ export const Scene = ({ shaderCode }: SceneProps) => {
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.maxDistance = 10;
             controls.minDistance = 2;
+            controls.autoRotate = autoRotate;
+            controls.autoRotateSpeed = 0.5;
+            controls.enableDamping = true;
 
             // Add directional light
             const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -117,6 +121,9 @@ export const Scene = ({ shaderCode }: SceneProps) => {
 
                 // Update uniforms
                 uniforms.u_time.value = (Date.now() - time) / 1000;
+
+                // Update controls
+                controls.update();
 
                 stats.end();
             };
