@@ -1,41 +1,21 @@
 import { glsl } from "./main";
 
 export const marcher = glsl`
-//---------------Main marcher---------------//
-struct March {
-    float disTravelled;
-    int steps;
-};
-March RayMarch(vec3 ro, vec3 rdn)
+float RayMarch(vec3 ro, vec3 rdn)
 {
     float d = 0.;
     float cd;
     vec3 p;
-    float eps = u_eps;
 
-    March m;
-    int i = 0;
-    for (; i < u_maxSteps; ++i) {
+    for (int i = 0; i < u_maxSteps; ++i) {
         p = ro + d * rdn;
         cd = GetDis(p);
 
-        if (d >= u_maxDis) {
-            d = u_maxDis;
-            break;
-        }
-
-        if (cd < 0.) { // Quick hack
-            d += cd * 10.;
-        }
-        else {
-            if (cd < eps) break;
-            d += cd;
-        }
+        if (cd < u_eps || d >= u_maxDis) break;
+        d += cd;
     }
 
-    m.disTravelled = d;
-    m.steps = i;
-    return m;
+    return d;
 }
 `
 
@@ -167,13 +147,13 @@ float de_inf_line(vec4 p, vec3 n, float r) {
 
 export const other = glsl`
 //---------------Get normal of SDF---------------//
-vec3 GetNormal(vec3 pos) // from https://iquilezles.org/articles/normalsSDF/
+vec3 GetNormal(vec3 p) // from https://iquilezles.org/articles/normalsSDF/
 {
 	vec3 n = vec3(0, 0, 0);
 	vec3 e;
 	for(int i = 0; i < 4; i++) {
 		e = 0.5773 * (2.0 * vec3((((i + 3) >> 1) & 1), ((i >> 1) & 1), (i & 1)) - 1.0);
-		n += e * GetDis(pos + e * u_eps);
+		n += e * GetDis(p + e * u_eps);
 	}
 	return normalize(n);
 }

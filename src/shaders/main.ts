@@ -4,8 +4,6 @@ export const glsl = (x: any) => x[0]; // Dummy function to enable syntax highlig
 
 // Shaders
 export const vertCode = glsl`
-out vec3 FragPos;  
-out vec3 Normal;
 out vec2 vUv;
 
 void main() {
@@ -13,9 +11,6 @@ void main() {
     vec4 worldPos = modelViewMatrix * vec4(position, 1.0);
     vec3 viewDir = normalize(-worldPos.xyz);
 
-    Normal = normalize(normal);
-    FragPos = vec3(modelMatrix * vec4(position, 1.0));
-    
     // Output vertex position
     gl_Position = projectionMatrix * worldPos;
 
@@ -26,8 +21,6 @@ void main() {
 export const uniformCode = glsl`
 precision mediump float;
 
-in vec3 FragPos;
-in vec3 Normal;
 in vec2 vUv;
 
 uniform vec3 u_clearColor;
@@ -60,13 +53,13 @@ void main() {
     vec3 ro = u_camPos;
     vec3 rd = (u_camInvProjMat * vec4(uv*2.-1., 0, 1)).xyz;
     rd = (u_camToWorldMat * vec4(rd, 0)).xyz;
-    vec3 rdn = normalize(rd);
+    rd = normalize(rd);
 
-    March m = RayMarch(ro, rdn); // use normalized ray
-    vec3 hp = ro + m.disTravelled * rdn;
+    float disTravelled = RayMarch(ro, rd); // use normalized ray
+    vec3 hp = ro + disTravelled * rd;
     vec3 n = GetNormal(hp);
 
-    if (m.disTravelled >= u_maxDis) { // if ray doesn't hit anything
+    if (disTravelled >= u_maxDis) { // if ray doesn't hit anything
         gl_FragColor = vec4(u_clearColor,1);
     } else { // if ray hits something
         float dotNL = dot(n, u_lightDir);
@@ -79,7 +72,7 @@ void main() {
     }
 
     // Debug
-    // gl_FragColor = vec4(m.disTravelled/u_maxDis,0,0,1);
+    // gl_FragColor = vec4(disTravelled/u_maxDis,0,0,1);
     // gl_FragColor = vec4(hp, 1);
     // gl_FragColor = vec4(n,1);
 }
