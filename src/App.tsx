@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css'
 import Scene from './components/scene'
 import { Button, Divider, Icon, IconButton, ThemeProvider, Tooltip, Typography } from '@mui/material';
