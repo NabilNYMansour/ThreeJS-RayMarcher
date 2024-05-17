@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css'
 import Scene from './components/scene'
 import { Button, Divider, Icon, IconButton, ThemeProvider, Tooltip, Typography } from '@mui/material';
@@ -48,8 +48,8 @@ function App() {
 
   const switchExample = (example: string) => {
     setEditorCodeChanges(example);
-    setShowCode(true);
-    setShadersCompiled(2);
+    setEditorCode(example);
+    setShadersCompiled(1);
   }
 
   return (
