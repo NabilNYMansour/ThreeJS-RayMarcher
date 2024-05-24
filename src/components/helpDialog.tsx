@@ -28,13 +28,17 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
             open={open} onClose={onClose}>
             <div style={{ backgroundColor: '#282c34' }}>
                 <DialogTitle style={{ textAlign: 'center', }}>
-                    Raymarching
+                    Raymarching in Three js
                 </DialogTitle>
                 <DialogContent>
                     <div>
                         <div>
                             <div>
-                                Raymarching is a technique used in
+                                <a
+                                    className='link'
+                                    target="_blank" rel="noreferrer"
+                                    href='https://medium.com/@nabilnymansour/ray-marching-in-three-js-66b03e3a6af2'>
+                                    Raymarching</a> is a technique used in
                                 computer graphics to render 3D scenes
                                 defined with <a
                                     className='link'
@@ -45,9 +49,8 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                             </div>
                             <Divider style={{ margin: '10px' }} />
                             <div>
-                                You can define your scene by writing the equation to the distance
-                                to your scene in the <code>GetDis</code> function and the color of
-                                the scene in the <code>GetAlbedo</code> function.
+                                You can define your scene by <b>writing an SDF equation</b> in the <code>scene</code> function and the color of
+                                the scene in the <code>sceneCol</code> function.
                             </div>
                             <CodeMirror
                                 style={{
@@ -68,15 +71,28 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                                 editable={false}
                             />
                             <div>
-                                Now once you are done writing the code for your scene, you can
+                                Now once you are done <b>writing the code</b> for your scene, you can
                                 click the play button <PlayArrowIcon fontSize='small' /> to see the scene rendered in the canvas.
                                 If everything compiles correctly, you should see a <CheckIcon fontSize='small' color='success' />
-                                otherwise, you will get <ClearIcon fontSize='small' color='error' /> with the error message showing
+                                otherwise, you will get <ClearIcon fontSize='small' color='error' /> with the error message(s) showing
                                 when you hover over the icon.
                             </div>
                             <Divider style={{ margin: '10px' }} />
                             <div>
-                                If you want to see some examples, you can click on any of the examples
+                                <a
+                                    className='link'
+                                    target="_blank" rel="noreferrer"
+                                    href='https://medium.com/@nabilnymansour/cone-marching-in-three-js-6d54eac17ad4'
+                                >Cone Marching</a> is an optimization technique used in raymarching to reduce the number of steps taken
+                                by marching a cone in the vertex shader.
+                                <br />
+                                <br />
+                                You can <b>disable</b> cone marching by unchecking the checkbox
+                                to see the difference in performance.
+                            </div>
+                            <Divider style={{ margin: '10px' }} />
+                            <div>
+                                If you want to see some <b>examples</b>, you can click on any of the examples
                                 above and the code will be loaded into the editor.
                             </div>
                             <Divider style={{ margin: '10px' }} />

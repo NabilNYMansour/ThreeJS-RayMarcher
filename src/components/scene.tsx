@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { fragCode, vertCode } from '../shaders/main';
+import { fragCode, uniformCode, vertCode } from '../shaders/main';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { coneMarcher, other, rayMarcher } from '../shaders/engine';
 
 interface SceneProps {
     shaderCode: string;
     isMobile: boolean;
+    useConeMarching: boolean;
 }
 
-export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
+export const Scene = ({ shaderCode, isMobile, useConeMarching }: SceneProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [renderer, setRenderer] = useState<THREE.WebGLRenderer>();
     const material = useRef<THREE.ShaderMaterial>();
@@ -20,7 +22,6 @@ export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
             // Create scene, camera, and set renderer
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            // const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
             renderer.setSize(window.innerWidth / resizeFactor, window.innerHeight / resizeFactor);
 
             // Set background color
@@ -54,6 +55,8 @@ export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
                 u_camPos: { value: camera.position },
                 u_camToWorldMat: { value: camera.matrixWorld },
                 u_camInvProjMat: { value: camera.projectionMatrixInverse },
+                u_camPlaneSubdivisions: { value: Math.trunc(camera.aspect * 32) },
+                u_camTanFov: { value: Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) },
 
                 u_lightDir: { value: light.position },
                 u_lightColor: { value: light.color },
@@ -65,14 +68,15 @@ export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
                 u_time: { value: 0 },
 
                 u_shininess: { value: 16 },
+
+                u_useConeMarching: { value: useConeMarching },
             };
 
             // add screen plane
-            const geometry = new THREE.PlaneGeometry();
+            let geometry = new THREE.PlaneGeometry(1, 1, Math.trunc(camera.aspect * 32), 32);
             material.current = new THREE.ShaderMaterial({
-                vertexShader: vertCode,
-                fragmentShader: shaderCode + fragCode,
-                transparent: true,
+                vertexShader: uniformCode + shaderCode + coneMarcher + vertCode,
+                fragmentShader: uniformCode  + shaderCode + rayMarcher + other + fragCode,
             });
             material.current.uniforms = uniforms;
             const screenPlane = new THREE.Mesh(geometry, material.current);
@@ -93,6 +97,11 @@ export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
                 const nearPlaneHeight = nearPlaneWidth / camera.aspect;
                 screenPlane.scale.set(nearPlaneWidth, nearPlaneHeight, 1);
 
+                geometry.dispose();
+                geometry = new THREE.PlaneGeometry(1, 1, Math.trunc(camera.aspect * 32), 32);
+
+                screenPlane.geometry = geometry;
+                if (material.current) material.current.uniforms.u_camPlaneSubdivisions.value = Math.trunc(camera.aspect * 32);
                 if (renderer) renderer.setSize(window.innerWidth / resizeFactor, window.innerHeight / resizeFactor);
             });
 
@@ -155,10 +164,17 @@ export const Scene = ({ shaderCode, isMobile }: SceneProps) => {
 
     useEffect(() => { // Update shader code (assuming it compiles correctly)
         if (material.current) {
-            material.current.fragmentShader = shaderCode + fragCode;
+            material.current.vertexShader = uniformCode + shaderCode + coneMarcher + vertCode;
+            material.current.fragmentShader = uniformCode + shaderCode + rayMarcher + other + fragCode;
             material.current.needsUpdate = true;
         }
     }, [shaderCode])
+
+    useEffect(() => { // Update cone marching
+        if (material.current) {
+            material.current.uniforms.u_useConeMarching.value = useConeMarching;
+        }
+    }, [useConeMarching]);
 
     return <div className='canvas-wrapper'>
         <canvas style={{ scale: resizeFactor.toString() }} ref={canvasRef} />

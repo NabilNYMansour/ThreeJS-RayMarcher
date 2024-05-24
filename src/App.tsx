@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import './App.css'
 import Scene from './components/scene'
-import { Button, Divider, Icon, IconButton, ThemeProvider, Tooltip, Typography } from '@mui/material';
+import { Button, Checkbox, Divider, Icon, IconButton, ThemeProvider, Tooltip, Typography } from '@mui/material';
 import { darkTheme } from './themes/themes';
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { marcher, other, utils } from './shaders/engine';
 import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from '@codemirror/lang-cpp';
 import { checkShaderComplied, fragCode, uniformCode, vertCode } from './shaders/main';
@@ -19,26 +18,31 @@ import HelpIcon from '@mui/icons-material/Help';
 import HelpDialog from './components/helpDialog';
 import { isMobile } from 'react-device-detect';
 import MobileView from './components/mobileView';
+import { coneMarcher, other, rayMarcher } from './shaders/engine';
 
 function App() {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const [editorCode, setEditorCode] = useState<string>(infiniteSpheres);
   const [editorCodeChanges, setEditorCodeChanges] = useState<string>(infiniteSpheres);
-  const [shadersCompiled, setShadersCompiled] = useState<0 | 1 | 2>(1);
-  const [shaderError, setShaderError] = useState<string>('');
 
+  const [shadersCompiled, setShadersCompiled] = useState<0 | 1 | 2>(1);
+  const [shaderError, setShaderError] = useState<string[]>([]);
+
+  const [coneMarchingEnabled, setConeMarchingEnabled] = useState<boolean>(true);
   const [showCode, setShowCode] = useState<boolean>(true);
 
   const applyChanges = () => {
-    // vertCode is guaranteed to be compiled
-    const checkShaders = checkShaderComplied(vertCode, uniformCode + utils + editorCodeChanges + marcher + other + fragCode)
-    console.log(checkShaders.errorInfo);
+    const checkShaders = checkShaderComplied(
+      uniformCode + editorCodeChanges + coneMarcher + vertCode,
+      uniformCode + editorCodeChanges + rayMarcher + other + fragCode
+    );
+
     setShadersCompiled(checkShaders.compiled ? 1 : 0);
     if (checkShaders.compiled) {
       setEditorCode(editorCodeChanges);
     } else {
-      setShaderError(checkShaders.errorInfo.slice(0, checkShaders.errorInfo.length - 1));
+      setShaderError(checkShaders.errorInfoList);
     }
   };
 
@@ -50,6 +54,7 @@ function App() {
     setEditorCodeChanges(example);
     setEditorCode(example);
     setShadersCompiled(1);
+    setShowCode(true);
   }
 
   return (
@@ -61,7 +66,8 @@ function App() {
           <>
             {/* ------------------------ Top bar ------------------------ */}
             <div className='top-bar-wrapper'>
-              <div className='top-bar'>
+              <div
+                className='top-bar'>
                 <Button
                   style={{ minWidth: '120px' }}
                   onClick={toggleShowCode}
@@ -70,6 +76,19 @@ function App() {
                   {showCode ? "Hide Code" : "Show Code"}
                 </Button>
                 <Divider orientation="vertical" variant="fullWidth" flexItem />
+
+                <Typography typography="body2" style={{ paddingLeft: '8px', marginRight: '-5px' }}>
+                  Enable Cone Marching
+                </Typography>
+                <Checkbox
+                  aria-label='Cone Marching'
+                  checked={coneMarchingEnabled}
+                  onChange={() => setConeMarchingEnabled(!coneMarchingEnabled)}
+
+                />
+
+                <Divider orientation="vertical" variant="fullWidth" flexItem />
+
                 <Tooltip
                   title={
                     <div style={{ fontSize: "1.5em", textAlign: "center" }}>
@@ -130,7 +149,7 @@ function App() {
                     allowMultipleSelections: false,
                     indentOnInput: false,
                   }}
-                  theme='dark'
+                  theme={'dark'}
                   extensions={[cpp()]}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' && event.altKey) {
@@ -156,9 +175,9 @@ function App() {
                     title={shadersCompiled === 2 ?
                       "Not compiled" :
                       shadersCompiled ? "Compiled" :
-                        <div style={{ fontSize: "1.5em", textAlign: "center" }}>
-                          {shaderError}
-                        </div>
+                        shaderError.map((error, index) => (
+                          <div style={{ fontSize: "1.2em" }} key={index}>{error}</div>
+                        ))
                     } enterDelay={500}>
                     <Icon style={{ padding: '8px' }}>
                       {shadersCompiled === 2 ?
@@ -176,7 +195,7 @@ function App() {
             {/* ------------------------ Scene ------------------------ */}
             <SceneFooter />
           </>}
-        <Scene isMobile={isMobile} shaderCode={uniformCode + utils + editorCode + marcher + other} />
+        <Scene isMobile={isMobile} shaderCode={editorCode} useConeMarching={coneMarchingEnabled} />
         {/* ------------------------------------------------------- */}
       </div>
     </ThemeProvider >
