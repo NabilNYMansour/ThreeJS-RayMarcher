@@ -35,7 +35,7 @@ uniform bool u_useConeMarching;
 export const vertCode = glsl`
 // to send to fragment shader
 out vec2 vUv;
-flat out float vDisTravelled;
+out float vDisTravelled;
 flat out int vSteps;
 
 void main() {
@@ -53,47 +53,55 @@ void main() {
     vDisTravelled = 0.;
     vSteps = 0;
     if (u_useConeMarching) {
-        vec3 cro = u_camPos; // cone ray origin
-        vec3 crd = (u_camInvProjMat * vec4(uv*2.-1., 0, 1)).xyz; // cone ray direction
+        vec3 cro = u_camPos;
+        vec3 crd = (u_camInvProjMat * vec4(uv*2.-1., 0, 1)).xyz;
         crd = (u_camToWorldMat * vec4(crd, 0)).xyz;
         crd = normalize(crd);
-        March result = coneMarch(cro, crd); // cone march
-        vDisTravelled = result.dis; // update distance travelled
-        vSteps = result.steps; // update steps taken
+        March result = coneMarch(cro, crd);
+        vDisTravelled = result.dis; 
+        vSteps = result.steps;
     }
 }`
 
+// ----------------- Fragment Shader ----------------- //
 export const fragCode = glsl`
+// From vertex shader
 in vec2 vUv;
-flat in float vDisTravelled;
+in float vDisTravelled;
 flat in int vSteps;
 
 void main() {
+    // If distance travelled is too big, clear color
     if (vDisTravelled >= u_maxDis) {
         gl_FragColor = vec4(u_clearColor,1);
         return;
     }
+    // Get UV from vertex shader
     vec2 uv = vUv.xy;
 
+    // Get ray origin and direction from camera uniforms
     vec3 ro = u_camPos;
     vec3 rd = (u_camInvProjMat * vec4(uv*2.-1., 0, 1)).xyz;
     rd = (u_camToWorldMat * vec4(rd, 0)).xyz;
     rd = normalize(rd);
 
-    float disTravelled = RayMarch(vDisTravelled, vSteps, ro, rd); // use normalized ray
-    vec3 hp = ro + disTravelled * rd;
-    vec3 n = GetNormal(hp);
+    // Ray marching and find total distance travelled
+    float disTravelled = rayMarch(vDisTravelled, vSteps, ro, rd); // use normalized ray
 
     if (disTravelled >= u_maxDis) { // if ray doesn't hit anything
-        gl_FragColor = vec4(u_clearColor* (u_useConeMarching ? 2. : 1.),1);
+        gl_FragColor = vec4(u_clearColor * (u_useConeMarching ? 2. : 1.),1);
     } else { // if ray hits something
+        // Calculate Diffuse model
+        vec3 hp = ro + disTravelled * rd; // Find the hit position
+        vec3 n = sceneNormal(hp); // Get normal of hit point
+
         float dotNL = dot(n, u_lightDir);
         float diff = max(dotNL, 0.0) * u_diffIntensity;
         float spec = pow(diff, u_shininess) * u_specIntensity;
         float ambient = u_ambientIntensity;
-
+        
         vec3 color = u_lightColor * (sceneCol(hp) * (spec + ambient + diff));
-        gl_FragColor = vec4(color,1);
+        gl_FragColor = vec4(color,1); // color output
     }
 }
 `;

@@ -1,13 +1,13 @@
 import { glsl } from "./main";
 
 export const rayMarcher = glsl`
-float RayMarch(float startDis, int stepsTaken, vec3 ro, vec3 rdn)
+float rayMarch(float startDis, int stepsTaken, vec3 ro, vec3 rdn)
 {
-    float d = 0.;
+    float d = startDis;
     float cd;
     vec3 p;
 
-    for (int i = 0; i < u_maxSteps; ++i) {
+    for (int i = stepsTaken; i < u_maxSteps; ++i) {
         p = ro + d * rdn;
         cd = scene(p);
 
@@ -50,7 +50,7 @@ March coneMarch(vec3 cro, vec3 crd)
 
 export const other = glsl`
 //---------------Get normal of SDF---------------//
-vec3 GetNormal(vec3 p) // from https://iquilezles.org/articles/normalsSDF/
+vec3 sceneNormal(vec3 p) // from https://iquilezles.org/articles/normalsSDF/
 {
 	vec3 n = vec3(0, 0, 0);
 	vec3 e;

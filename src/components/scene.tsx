@@ -55,8 +55,8 @@ export const Scene = ({ shaderCode, isMobile, useConeMarching }: SceneProps) => 
                 u_camPos: { value: camera.position },
                 u_camToWorldMat: { value: camera.matrixWorld },
                 u_camInvProjMat: { value: camera.projectionMatrixInverse },
-                u_camPlaneSubdivisions: { value: Math.trunc(camera.aspect * 32) },
                 u_camTanFov: { value: Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) },
+                u_camPlaneSubdivisions: { value: Math.trunc(camera.aspect * 32) },
 
                 u_lightDir: { value: light.position },
                 u_lightColor: { value: light.color },
